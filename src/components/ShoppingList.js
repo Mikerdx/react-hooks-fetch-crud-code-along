@@ -1,32 +1,64 @@
-import React, { useState } from "react";
-import ItemForm from "./ItemForm";
-import Filter from "./Filter";
-import Item from "./Item";
+import React, { useEffect, useState } from "react";
 
 function ShoppingList() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [items, setItems] = useState([]);
+  const [filter, setFilter] = useState("All");
+  const [formData, setFormData] = useState({ name: "", category: "Produce" });
 
-  function handleCategoryChange(category) {
-    setSelectedCategory(category);
+  useEffect(() => {
+    fetch("http://localhost:3000/items")
+      .then((res) => res.json())
+      .then((data) => setItems(data));
+  }, []);
+
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  const itemsToDisplay = items.filter((item) => {
-    if (selectedCategory === "All") return true;
+  function handleSubmit(e) {
+    e.preventDefault();
+    const newItem = { ...formData };
+    setItems([...items, newItem]);
+  }
 
-    return item.category === selectedCategory;
-  });
+  const visibleItems =
+    filter === "All" ? items : items.filter((item) => item.category === filter);
 
   return (
     <div className="ShoppingList">
-      <ItemForm />
-      <Filter
-        category={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-      />
+      <form onSubmit={handleSubmit}>
+        <label>
+          Name:
+          <input name="name" value={formData.name} onChange={handleChange} />
+        </label>
+        <label>
+          Category:
+          <select name="category" value={formData.category} onChange={handleChange}>
+            <option value="Produce">Produce</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Dessert">Dessert</option>
+          </select>
+        </label>
+        <button type="submit">Add to List</button>
+      </form>
+
+      <div className="Filter">
+        <select name="filter" value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <option value="All">Filter by category</option>
+          <option value="Produce">Produce</option>
+          <option value="Dairy">Dairy</option>
+          <option value="Dessert">Dessert</option>
+        </select>
+      </div>
+
       <ul className="Items">
-        {itemsToDisplay.map((item) => (
-          <Item key={item.id} item={item} />
+        {visibleItems.map((item, index) => (
+          <li key={index}>
+            <span>{item.name}</span>
+            <span className="category">{item.category}</span>
+            <button>Add to Cart</button>
+            <button>Delete</button>
+          </li>
         ))}
       </ul>
     </div>
