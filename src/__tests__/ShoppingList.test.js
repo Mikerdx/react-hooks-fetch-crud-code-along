@@ -1,7 +1,8 @@
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import '@testing-library/jest-dom';
-import ShoppingList from "../ShoppingList";
+import ShoppingList from "../components/ShoppingList";
+
 
 beforeEach(() => {
   global.fetch = jest.fn(() =>
